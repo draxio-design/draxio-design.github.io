@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Draxio — Boutique</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #080809;
+      --surface: #111114;
+      --border:  #222228;
+      --gold:    #c9a84c;
+      --gold2:   #e8c97a;
+      --text:    #f0ede8;
+      --muted:   #7a7870;
+      --card:    #13131a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    .cursor      { position:fixed;top:0;left:0;z-index:9999;width:10px;height:10px;background:var(--gold);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);transition:transform .15s ease,width .2s,height .2s; }
+    .cursor-ring { position:fixed;top:0;left:0;z-index:9998;width:36px;height:36px;border:1px solid var(--gold);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);transition:transform .4s ease,width .3s,height .3s,opacity .3s;opacity:.5; }
+
+    /* NAV */
+    nav {
+      position: fixed; top:0; left:0; right:0; z-index:100;
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 1.4rem 3rem;
+      background: linear-gradient(to bottom, rgba(8,8,9,.95), transparent);
+      backdrop-filter: blur(6px);
+    }
+    .logo { font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.12em;color:var(--gold);text-decoration:none; }
+    .nav-links { display:flex;gap:2.5rem;list-style:none; }
+    .nav-links a { font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s; }
+    .nav-links a:hover, .nav-links a.active { color:var(--gold); }
+
+    /* HERO BOUTIQUE */
+    .shop-hero {
+      padding: 9rem 3rem 4rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .shop-hero::before {
+      content:'';position:absolute;inset:0;
+      background-image: linear-gradient(var(--border) 1px,transparent 1px), linear-gradient(90deg,var(--border) 1px,transparent 1px);
+      background-size: 60px 60px;opacity:.2;
+    }
+    .shop-hero::after {
+      content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      width:500px;height:300px;
+      background:radial-gradient(ellipse,rgba(201,168,76,.07) 0%,transparent 70%);
+    }
+    .shop-hero-inner { position:relative;z-index:1; }
+    .section-label { font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:.8rem; }
+    .section-label::before,.section-label::after { content:'';display:inline-block;width:20px;height:1px;background:var(--gold); }
+
+    /* === MODIFIE LE TITRE DE LA BOUTIQUE ICI === */
+    .shop-hero h1 { font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,10vw,6rem);letter-spacing:.08em;color:var(--text);line-height:1; }
+    .shop-hero p  { font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--muted);font-size:1.1rem;margin-top:.8rem; }
+
+    /* FILTRES */
+    .filters {
+      display:flex;gap:.8rem;justify-content:center;
+      padding: 2.5rem 3rem 0;
+      flex-wrap:wrap;
+    }
+    .filter-btn {
+      font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;
+      padding:.55rem 1.4rem;border-radius:3px;border:1px solid var(--border);
+      background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;
+    }
+    .filter-btn:hover, .filter-btn.active { border-color:var(--gold);color:var(--gold); }
+
+    /* CONTENU PRINCIPAL */
+    .shop-main { max-width:1200px;margin:0 auto;padding:4rem 3rem 6rem; }
+
+    /* ---- SECTION DE CATÉGORIE ---- */
+    .category-section { margin-bottom: 5rem; }
+
+    .category-header {
+      display:flex;align-items:center;gap:1.5rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* === MODIFIE LES TITRES DE CATÉGORIE ICI === */
+    .category-header h2 {
+      font-family:'Bebas Neue',sans-serif;
+      font-size:2rem;letter-spacing:.1em;
+      color:var(--gold);
+    }
+    .cat-count { font-size:.75rem;color:var(--muted);letter-spacing:.1em; }
+
+    /* GRILLE DE PRODUITS */
+    .products-grid {
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap:1.5rem;
+    }
+
+    /* ---- CARTE PRODUIT ---- */
+    /*
+    =========================================================
+    COMMENT AJOUTER UN PRODUIT :
+    Copie un bloc <div class="product-card"> complet
+    et modifie :
+      - data-category : "cv", "image" ou "flyer"
+      - L'image src (ou laisse le placeholder)
+      - Le titre h3
+      - La description p
+      - Le prix .price
+      - Le lien href du bouton (ton lien Gumroad)
+    =========================================================
+    */
+    .product-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius:6px;
+      overflow:hidden;
+      transition: border-color .3s, transform .3s;
+      display:flex;flex-direction:column;
+    }
+    .product-card:hover { border-color:rgba(201,168,76,.35);transform:translateY(-5px); }
+
+    /* IMAGE DU PRODUIT */
+    .product-img {
+      width:100%;
+      aspect-ratio: 4/3;
+      object-fit:cover;
+      display:block;
+      background: var(--surface);
+    }
+
+    /* Placeholder quand pas d'image */
+    .product-img-placeholder {
+      width:100%;aspect-ratio:4/3;
+      background: linear-gradient(135deg, var(--surface), var(--card));
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:1rem;letter-spacing:.2em;color:rgba(201,168,76,.2);
+    }
+
+    .product-body { padding:1.5rem;flex:1;display:flex;flex-direction:column;gap:.6rem; }
+
+    .product-tag {
+      font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+      color:var(--gold);opacity:.7;
+    }
+
+    /* === MODIFIE LES TITRES DE PRODUITS ICI === */
+    .product-body h3 {
+      font-family:'Cormorant Garamond',serif;
+      font-size:1.25rem;font-weight:400;
+      color:var(--text);line-height:1.3;
+    }
+
+    /* === MODIFIE LES DESCRIPTIONS ICI === */
+    .product-body p {
+      font-size:.82rem;color:var(--muted);line-height:1.7;
+      flex:1;
+    }
+
+    .product-footer {
+      display:flex;align-items:center;justify-content:space-between;
+      padding:1rem 1.5rem;
+      border-top:1px solid var(--border);
+    }
+
+    /* === MODIFIE LES PRIX ICI === */
+    .price {
+      font-family:'Bebas Neue',sans-serif;
+      font-size:1.5rem;letter-spacing:.05em;
+      color:var(--gold);
+    }
+    .price-note { font-size:.65rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase; }
+
+    /* Bouton acheter */
+    .btn-buy {
+      font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;
+      padding:.6rem 1.4rem;border-radius:3px;
+      background:var(--gold);color:#080809;font-weight:500;
+      text-decoration:none;
+      transition:background .2s, transform .2s;
+      white-space:nowrap;
+    }
+    .btn-buy:hover { background:var(--gold2);transform:translateY(-1px); }
+
+    /* ---- BOUTON "AJOUTER" visible seulement toi (explications ci-dessous) ---- */
+    .add-product-hint {
+      border: 1px dashed var(--border);
+      border-radius:6px;
+      padding:2.5rem;
+      display:flex;align-items:center;justify-content:center;
+      flex-direction:column;gap:.8rem;
+      color:var(--muted);
+      font-size:.8rem;
+      text-align:center;
+      line-height:1.6;
+    }
+    .add-product-hint span { font-size:1.5rem; }
+
+    /* FOOTER */
+    .divider { height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0; }
+    footer { padding:2rem 3rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem; }
+    footer p { font-size:.75rem;color:var(--muted);letter-spacing:.08em; }
+    .socials { display:flex;gap:1.5rem; }
+    .socials a { font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s; }
+    .socials a:hover { color:var(--gold); }
+
+    @media(max-width:768px){
+      nav{padding:1.2rem 1.5rem;}
+      .shop-hero,.shop-main{padding-left:1.5rem;padding-right:1.5rem;}
+      .filters{padding:2rem 1.5rem 0;}
+      .products-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="logo">Draxio</a>
+    <ul class="nav-links">
+      <li><a href="index.html#about">À propos</a></li>
+      <li><a href="#" class="active">Boutique</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <div class="shop-hero">
+    <div class="shop-hero-inner">
+      <div class="section-label">Boutique</div>
+      <!-- === MODIFIE ICI === -->
+      <h1>Mes Créations</h1>
+      <p>Téléchargement instantané — chaque fichier est prêt à l'emploi</p>
+    </div>
+  </div>
+
+  <!-- FILTRES (cliquables pour filtrer par catégorie) -->
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">Tout voir</button>
+    <button class="filter-btn" data-filter="cv">CV</button>
+    <button class="filter-btn" data-filter="image">Images</button>
+    <button class="filter-btn" data-filter="flyer">Flyers</button>
+  </div>
+
+  <!-- CONTENU BOUTIQUE -->
+  <main class="shop-main">
+
+    <!-- ======================================
+         SECTION CV
+         Pour ajouter un CV : copie une
+         .product-card avec data-category="cv"
+    ====================================== -->
+    <div class="category-section" id="cv">
+      <div class="category-header">
+        <h2>📄 CV</h2>
+        <span class="cat-count">Modèles personnalisables</span>
+      </div>
+      <div class="products-grid">
+
+        <!-- PRODUIT CV 1 — MODIFIE ICI -->
+        <div class="product-card" data-category="cv">
+          <!--
+            POUR AJOUTER TON IMAGE :
+            Remplace la div .product-img-placeholder par :
+            <img class="product-img" src="The-Boys-saison-2-affiche.jpg" alt="Nom du produit"/>
+            (place l'image dans le même dossier que ce fichier)
+          -->
+          <<img class="product-img" src="CV1.png" alt="CV Élégant"/>
+          <div class="product-body">
+            <span class="product-tag">CV</span>
+            <!-- === MODIFIE LE NOM DU PRODUIT ICI === -->
+            <h3>CV Élégant — Edition Noir & Or</h3>
+            <!-- === MODIFIE LA DESCRIPTION ICI === -->
+            <p>Un CV sobre et professionnel avec une touche dorée. Format A4, fichier PDF + Word modifiable.</p>
+          </div>
+          <div class="product-footer">
+            <div>
+              <!-- === MODIFIE LE PRIX ICI === -->
+              <div class="price">10,00 €</div>
+              <div class="price-note">Téléchargement immédiat</div>
+            </div>
+            <!-- === REMPLACE # PAR TON LIEN GUMROAD ICI === -->
+            <a href="#" class="btn-buy" target="_blank">Acheter →</a>
+          </div>
+        </div>
+
+        <!-- PRODUIT CV 2 — MODIFIE ICI -->
+        <div class="product-card" data-category="cv">
+          <img class="product-img" src="CV2.png" alt="CV Professionnel"/>
+          <div class="product-body">
+            <span class="product-tag">CV</span>
+            <h3>CV Moderne — Edition Minimaliste</h3>
+            <p>Design épuré et contemporain. Idéal pour tous les secteurs. Format A4, PDF + Word.</p>
+          </div>
+          <div class="product-footer">
+            <div>
+              <div class="price">5,00 €</div>
+              <div class="price-note">Téléchargement immédiat</div>
+            </div>
+            <a href="#" class="btn-buy" target="_blank">Acheter →</a>
+          </div>
+        </div>
+
+        <!-- EMPLACEMENT POUR UN NOUVEAU CV — copie ce bloc et remplis-le -->
+        <div class="add-product-hint">
+          <span>＋</span>
+          <strong>Ajouter un CV</strong>
+          <p>Copie un bloc product-card ci-dessus,<br/>change le texte, l'image et le lien Gumroad</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================================
+         SECTION IMAGES
+    ====================================== -->
+    <div class="category-section" id="images">
+      <div class="category-header">
+        <h2>🖼️ Images</h2>
+        <span class="cat-count">Visuels créatifs</span>
+      </div>
+      <div class="products-grid">
+
+        <!-- PRODUIT IMAGE 1 -->
+        <div class="product-card" data-category="image">
+          <div class="product-img-placeholder">APERÇU IMAGE</div>
+          <div class="product-body">
+            <span class="product-tag">Image</span>
+            <h3>Pack Wallpapers — Collection Sombre</h3>
+            <p>5 fonds d'écran haute résolution au style sombre et cinématique. Format 4K PNG.</p>
+          </div>
+          <div class="product-footer">
+            <div>
+              <div class="price">3,00 €</div>
+              <div class="price-note">Téléchargement immédiat</div>
+            </div>
+            <a href="#" class="btn-buy" target="_blank">Acheter →</a>
+          </div>
+        </div>
+
+        <!-- PRODUIT IMAGE 2 -->
+        <div class="product-card" data-category="image">
+          <div class="product-img-placeholder">APERÇU IMAGE</div>
+          <div class="product-body">
+            <span class="product-tag">Image</span>
+            <h3>Pack Visuels Réseaux Sociaux</h3>
+            <p>10 templates visuels pour Instagram et TikTok. Formats optimisés, modifiables.</p>
+          </div>
+          <div class="product-footer">
+            <div>
+              <div class="price">8,00 €</div>
+              <div class="price-note">Téléchargement immédiat</div>
+            </div>
+            <a href="#" class="btn-buy" target="_blank">Acheter →</a>
+          </div>
+        </div>
+
+        <div class="add-product-hint">
+          <span>＋</span>
+          <strong>Ajouter une image</strong>
+          <p>Copie un bloc product-card,<br/>change le texte, l'image et le lien Gumroad</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================================
+         SECTION FLYERS
+    ====================================== -->
+    <div class="category-section" id="flyers">
+      <div class="category-header">
+        <h2>📢 Flyers</h2>
+        <span class="cat-count">Prêts à imprimer & partager</span>
+      </div>
+      <div class="products-grid">
+
+        <!-- PRODUIT FLYER 1 -->
+        <div class="product-card" data-category="flyer">
+          <div class="product-img-placeholder">APERÇU IMAGE</div>
+          <div class="product-body">
+            <span class="product-tag">Flyer</span>
+            <h3>Flyer Événement — Style Luxe</h3>
+            <p>Template flyer A5 recto/verso pour soirée ou événement. Fond sombre, typographie élégante.</p>
+          </div>
+          <div class="product-footer">
+            <div>
+              <div class="price">4,00 €</div>
+              <div class="price-note">Téléchargement immédiat</div>
+            </div>
+            <a href="#" class="btn-buy" target="_blank">Acheter →</a>
+          </div>
+        </div>
+
+        <!-- PRODUIT FLYER 2 -->
+        <div class="product-card" data-category="flyer">
+          <div class="product-img-placeholder">APERÇU IMAGE</div>
+          <div class="product-body">
+            <span class="product-tag">Flyer</span>
+            <h3>Flyer Promo — Style Moderne</h3>
+            <p>Format carré adapté aux stories Instagram. Couleurs vives, impact immédiat. Fichier PNG HD.</p>
+          </div>
+          <div class="product-footer">
+            <div>
+              <div class="price">4,00 €</div>
+              <div class="price-note">Téléchargement immédiat</div>
+            </div>
+            <a href="#" class="btn-buy" target="_blank">Acheter →</a>
+          </div>
+        </div>
+
+        <div class="add-product-hint">
+          <span>＋</span>
+          <strong>Ajouter un flyer</strong>
+          <p>Copie un bloc product-card,<br/>change le texte, l'image et le lien Gumroad</p>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <div class="divider"></div>
+  <footer>
+    <p>© 2025 Draxio — Tous droits réservés</p>
+    <div class="socials">
+      <a href="#">Instagram</a>
+      <a href="#">TikTok</a>
+      <a href="index.html">Accueil</a>
+    </div>
+  </footer>
+
+  <script>
+    // Curseur
+    const cursor = document.getElementById('cursor');
+    const ring   = document.getElementById('cursorRing');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX+'px'; cursor.style.top = e.clientY+'px';
+      setTimeout(()=>{ ring.style.left=e.clientX+'px'; ring.style.top=e.clientY+'px'; }, 80);
+    });
+    document.querySelectorAll('a,button').forEach(el=>{
+      el.addEventListener('mouseenter',()=>{ cursor.style.width='20px';cursor.style.height='20px';ring.style.width='50px';ring.style.height='50px';ring.style.opacity='1'; });
+      el.addEventListener('mouseleave',()=>{ cursor.style.width='10px';cursor.style.height='10px';ring.style.width='36px';ring.style.height='36px';ring.style.opacity='.5'; });
+    });
+
+    // Filtres
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards      = document.querySelectorAll('.product-card');
+    const sections   = document.querySelectorAll('.category-section');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const f = btn.dataset.filter;
+
+        if (f === 'all') {
+          sections.forEach(s => s.style.display = '');
+          cards.forEach(c => c.style.display = '');
+        } else {
+          sections.forEach(s => {
+            const id = s.id;
+            const map = { cv:'cv', images:'image', flyers:'flyer' };
+            s.style.display = map[id] === f ? '' : 'none';
+          });
+          cards.forEach(c => {
+            c.style.display = c.dataset.category === f ? '' : 'none';
+          });
+        }
+      });
+    });
+
+    // Animation entrée cartes
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach((e,i) => {
+        if(e.isIntersecting){
+          setTimeout(()=>{
+            e.target.style.opacity='1';
+            e.target.style.transform='translateY(0)';
+          }, i*80);
+        }
+      });
+    }, {threshold:0.1});
+
+    document.querySelectorAll('.product-card').forEach(el=>{
+      el.style.opacity='0';
+      el.style.transform='translateY(24px)';
+      el.style.transition='opacity .5s ease, transform .5s ease, border-color .3s, transform .3s';
+      obs.observe(el);
+    });
+  </script>
+</body>
+</html>
